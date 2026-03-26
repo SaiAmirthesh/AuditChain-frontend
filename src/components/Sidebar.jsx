@@ -69,10 +69,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         className={`flex flex-col absolute z-50 left-0 top-0 lg:static lg:left-auto lg:top-auto lg:translate-x-0 h-screen overflow-y-scroll lg:overflow-y-auto no-scrollbar w-64 lg:w-72 lg:sidebar-expanded:!w-72 2xl:!w-72 shrink-0 bg-[var(--color-primary)] p-4 transition-all duration-200 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-64'}`}
       >
         {/* Sidebar header */}
-        <div className="flex justify-between items-center pr-3 sm:px-2 mb-10 mt-2">
+        <div className="flex justify-between items-center pr-3 sm:px-2 mb-8 mt-1">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" className="w-8 h-8 rounded-lg shadow-sm" alt="Logo" />
-            <h1 className="text-white text-xl font-bold tracking-tight">AuditChain</h1>
+            <img src="/logo.png" className="w-7 h-7 rounded-md shadow-sm" alt="Logo" />
+            <h1 className="text-white text-lg font-bold tracking-tight">AuditChain</h1>
           </div>
           <button
             className="lg:hidden text-slate-400 hover:text-slate-200"

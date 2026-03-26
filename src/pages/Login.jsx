@@ -33,8 +33,8 @@ const Login = () => {
       transition={{ duration: 0.3 }}
     >
       <div className="mb-6 text-center">
-        <h3 className="text-xl font-semibold text-slate-800 tracking-tight">Sign in to your account</h3>
-        <p className="text-sm text-slate-500 mt-1">Select your role to access the correct portal</p>
+        <h3 className="text-lg font-bold text-slate-800 tracking-tight">Sign in to your account</h3>
+        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Select your role to access the correct portal</p>
       </div>
 
       <form onSubmit={handleLogin} className="space-y-5">

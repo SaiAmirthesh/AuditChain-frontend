@@ -34,8 +34,8 @@ const Register = () => {
       transition={{ duration: 0.3 }}
     >
       <div className="mb-6 text-center">
-        <h3 className="text-xl font-semibold text-slate-800 tracking-tight">Create your account</h3>
-        <p className="text-sm text-slate-500 mt-1">Join AuditChain for secure banking</p>
+        <h3 className="text-lg font-bold text-slate-800 tracking-tight">Create your account</h3>
+        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Join AuditChain for secure banking</p>
       </div>
 
       <form onSubmit={handleRegister} className="space-y-4">

@@ -45,13 +45,13 @@ const UserTransactions = () => {
     >
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Transactions</h1>
-          <p className="text-slate-500 mt-1">View and search your complete transaction history.</p>
+          <h1 className="text-xl font-bold text-slate-800">Transactions</h1>
+          <p className="text-xs text-slate-500 mt-0.5">View and search your complete transaction history.</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-200 flex items-center gap-4">
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-3.5 border-b border-slate-100 flex items-center gap-4 bg-slate-50/30">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute inset-y-0 left-0 h-full w-5 text-gray-400 pointer-events-none ml-3" />
             <input

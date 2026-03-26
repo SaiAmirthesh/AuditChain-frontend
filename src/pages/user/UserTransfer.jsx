@@ -102,49 +102,49 @@ const UserTransfer = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="max-w-2xl mx-auto"
+      className="max-w-xl mx-auto"
     >
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">Transfer Funds</h1>
-        <p className="text-slate-500 mt-1">Send money securely across AuditChain</p>
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-slate-800">Transfer Funds</h1>
+        <p className="text-xs text-slate-500 mt-0.5">Send money securely across AuditChain</p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
-        <div className="bg-blue-50/50 p-6 border-b border-slate-200 flex justify-between items-center">
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden relative">
+        <div className="bg-blue-50/30 p-5 border-b border-slate-100 flex justify-between items-center">
           <div>
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Available Balance</h2>
-            <div className="text-3xl font-bold text-blue-900 mt-1" ref={balanceRef}>
+            <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Available Balance</h2>
+            <div className="text-2xl font-bold text-blue-900 mt-1 tracking-tight" ref={balanceRef}>
               {formatMoney(account.balance)}
             </div>
           </div>
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-blue-600">
-            <Building size={24} />
+          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm text-blue-600 border border-slate-100">
+            <Building size={20} />
           </div>
         </div>
 
-        <div className="p-6 md:p-8 min-h-[400px] flex flex-col justify-center">
+        <div className="p-6 md:p-8 min-h-[380px] flex flex-col justify-center">
           <AnimatePresence mode="wait">
             {step === 1 && (
-              <motion.form key="form" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} onSubmit={handleTransfer} className="space-y-6">
+              <motion.form key="form" initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 15 }} onSubmit={handleTransfer} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Recipient Account (Username)</label>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Recipient Account</label>
                   <input
                     type="text"
                     required
                     value={recipient}
                     onChange={(e) => setRecipient(e.target.value)}
                     placeholder="e.g. jsmith22"
-                    className="block w-full border border-slate-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50"
+                    className="block w-full border border-slate-200 rounded-lg shadow-sm py-2.5 px-3.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50 text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Amount to Send</label>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Amount to Send</label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <span className="text-slate-500 sm:text-lg font-semibold">₹</span>
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <span className="text-slate-400 text-base font-bold">₹</span>
                     </div>
                     <input
                       type="number"
@@ -155,13 +155,13 @@ const UserTransfer = () => {
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                       placeholder="0.00"
-                      className="block w-full border border-slate-300 rounded-lg shadow-sm py-3 pl-8 pr-4 text-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50"
+                      className="block w-full border border-slate-200 rounded-lg shadow-sm py-2.5 pl-8 pr-4 text-lg font-bold focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50"
                     />
                   </div>
                 </div>
-                <div className="pt-4">
-                  <button type="submit" disabled={!amount || parseFloat(amount) <= 0 || parseFloat(amount) > account.balance} className="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-lg text-white bg-[var(--color-primary)] hover:bg-[#153457] disabled:opacity-50 transition-all">
-                    <Send size={20} /> Initiate Transfer
+                <div className="pt-2">
+                  <button type="submit" disabled={!amount || parseFloat(amount) <= 0 || parseFloat(amount) > account.balance} className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg text-white bg-[var(--color-primary)] hover:bg-[#153457] disabled:opacity-50 transition-all text-sm font-bold shadow-md hover:-translate-y-0.5">
+                    <Send size={18} /> Initiate Transfer
                   </button>
                 </div>
               </motion.form>
