@@ -1,29 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { StatCard } from '../../components/StatCard';
-import { ShieldCheck, Server, AlertTriangle, Hash, Loader } from 'lucide-react';
+import { ShieldCheck, Server, AlertTriangle, Hash, Loader, ShieldAlert, Activity } from 'lucide-react';
 import api from '../../services/api';
 
 const AuditorDashboard = () => {
   const [logs, setLogs] = useState([]);
+  const [totalLogsCount, setTotalLogsCount] = useState(0);
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [aiVerdict, setAiVerdict] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [hasFetchedAi, setHasFetchedAi] = useState(false);
+  const [isAiShrink, setIsAiShrink] = useState(true);
+
+  const fetchAIVerdict = async () => {
+      try {
+          setAiLoading(true);
+          setHasFetchedAi(true);
+          const res = await api.get('/auditor/ai-verdict');
+          setAiVerdict(res.data);
+      } catch (err) {
+          setAiVerdict("Security module scanning...");
+      } finally {
+          setAiLoading(false);
+      }
+  };
 
   useEffect(() => {
     const fetchAuditorData = async () => {
       try {
+        setLoading(true);
         const [logsRes, alertsRes] = await Promise.all([
-          api.get('/auditor/logs'),
+          api.get('/auditor/logs?page=0&size=10'),
           api.get('/auditor/alerts')
         ]);
-        setLogs(logsRes.data);
-        setAlerts(alertsRes.data);
+        setLogs(logsRes.data.content || []);
+        setTotalLogsCount(logsRes.data.totalElements || 0);
+        setAlerts(alertsRes.data || []);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchAuditorData();
   }, []);
 
@@ -32,7 +53,7 @@ const AuditorDashboard = () => {
   }
 
   const activeAlertsCount = alerts.length;
-  const recentLogs = logs.slice(-5).reverse(); // get last 5 in descending order if chronologically appended
+  const recentLogs = [...logs].reverse(); // Since backend returns Ascending, reverse it for dashboard preview
 
   return (
     <motion.div
@@ -47,7 +68,7 @@ const AuditorDashboard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         <StatCard title="System Integrity" value="100%" icon={ShieldCheck} trend="up" trendValue="Verified" format="number" />
-        <StatCard title="Total Audit Logs" value={logs.length} icon={Hash} trend="up" trendValue="+" format="number" />
+        <StatCard title="Total Audit Logs" value={totalLogsCount} icon={Hash} trend="up" trendValue="+" format="number" />
         <StatCard title="Active Alerts" value={activeAlertsCount} icon={AlertTriangle} trend="down" trendValue="0" format="number" />
         <StatCard title="Nodes Online" value="1" icon={Server} trend="up" trendValue="Stable" format="number" />
       </div>
@@ -72,8 +93,10 @@ const AuditorDashboard = () => {
                 {recentLogs.map((log) => (
                   <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-5 py-3.5 font-mono text-[11px] text-blue-600">CTX-{log.id}</td>
-                    <td className="px-5 py-3.5 font-bold text-slate-700 truncate max-w-[180px] text-xs">{log.action || log.details}</td>
-                    <td className="px-5 py-3.5 text-slate-400 text-[11px]">{new Date(log.timestamp).toLocaleString()}</td>
+                    <td className="px-5 py-3.5 font-bold text-slate-700 truncate max-w-[180px] text-xs">
+                      {log.operation} {log.tableName}
+                    </td>
+                    <td className="px-5 py-3.5 text-slate-400 text-[11px]">{new Date(log.changedAt).toLocaleString()}</td>
                     <td className="px-5 py-3.5">
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-50 text-green-700 border border-green-100 uppercase tracking-widest">
                         Verified
@@ -108,7 +131,7 @@ const AuditorDashboard = () => {
             <div>
               <div className="flex justify-between text-slate-500 text-[11px] font-bold uppercase tracking-widest mb-1.5">
                 <span>Current Height</span>
-                <span className="text-white font-mono">{logs.length} Blocks</span>
+                <span className="text-white font-mono">{totalLogsCount} Blocks</span>
               </div>
             </div>
             <div>
@@ -129,6 +152,51 @@ const AuditorDashboard = () => {
              </div>
           </div>
         </div>
+
+        {/* AI Verdict Sector */}
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="bg-white rounded-lg shadow-sm border border-slate-200 p-5 flex flex-col relative overflow-hidden"
+        >
+           <div className="flex items-center gap-2 mb-4">
+               <div className="p-1.5 bg-red-50 rounded-lg text-red-600 border border-red-100">
+                   <ShieldAlert size={18} />
+               </div>
+               <h2 className="text-sm font-bold text-slate-800 tracking-tight">Forensic AI Verdict</h2>
+           </div>
+
+           {!hasFetchedAi ? (
+              <button 
+                  onClick={fetchAIVerdict}
+                  className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-sm"
+              >
+                  <ShieldAlert size={14} /> Generate Security Verdict
+              </button>
+           ) : aiLoading ? (
+               <div className="space-y-3 animate-pulse">
+                   <div className="h-3 bg-slate-100 rounded w-full"></div>
+                   <div className="h-3 bg-slate-100 rounded w-5/6"></div>
+                   <div className="h-3 bg-slate-100 rounded w-4/6"></div>
+               </div>
+           ) : (
+                <div className="bg-red-50/30 border-l-4 border-red-500 p-5 rounded-r-xl">
+                    <p className={`text-sm leading-relaxed text-slate-700 italic font-medium transition-all duration-300 ${isAiShrink ? 'line-clamp-2' : ''}`}>
+                        {aiVerdict.replace(/[\[\]*]/g, '').trim()}
+                    </p>
+                    <button 
+                        onClick={() => setIsAiShrink(!isAiShrink)}
+                        className="mt-3 text-[10px] font-bold uppercase tracking-wider text-red-600 hover:text-red-800 transition-colors"
+                    >
+                        {isAiShrink ? 'Full Forensic Report' : 'Dismiss Detail'}
+                    </button>
+                    <div className="mt-6 flex items-center gap-2 pt-4 border-t border-red-100/50">
+                        <Activity size={12} className="text-green-500" />
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Real-time Chain Monitoring Active</span>
+                    </div>
+                </div>
+           )}
+        </motion.div>
       </div>
     </motion.div>
   );

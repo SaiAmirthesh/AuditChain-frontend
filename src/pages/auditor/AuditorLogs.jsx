@@ -2,17 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Hash, AlertTriangle, ShieldCheck, Loader } from 'lucide-react';
 import api from '../../services/api';
+import Pagination from '../../components/Pagination';
 
 const AuditorLogs = () => {
   const [logs, setLogs] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const res = await api.get('/auditor/logs');
-        setLogs(res.data);
+        setLoading(true);
+        const res = await api.get(`/auditor/logs?page=${currentPage}&size=10`);
+        setLogs(res.data.content || []);
+        setTotalPages(res.data.totalPages || 1);
       } catch (err) {
         console.error(err);
       } finally {
@@ -20,7 +25,7 @@ const AuditorLogs = () => {
       }
     };
     fetchLogs();
-  }, []);
+  }, [currentPage]);
 
   const filteredLogs = logs.filter(l => 
     (l.action || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -96,6 +101,11 @@ const AuditorLogs = () => {
             </tbody>
           </table>
         </div>
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={setCurrentPage} 
+        />
       </div>
     </motion.div>
   );

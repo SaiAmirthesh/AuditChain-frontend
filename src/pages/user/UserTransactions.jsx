@@ -2,22 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Filter, Search, Download, Loader } from 'lucide-react';
 import api from '../../services/api';
+import Pagination from '../../components/Pagination';
 
 const UserTransactions = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userAcc, setUserAcc] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchTx = async () => {
       try {
+        setLoading(true);
         const [accRes, txRes] = await Promise.all([
           api.get('/user/dashboard'),
-          api.get('/user/transactions')
+          api.get(`/user/transactions?page=${currentPage}&size=10`)
         ]);
         setUserAcc(accRes.data.accountNumber);
-        setTransactions(txRes.data);
+        setTransactions(txRes.data.content || []); // Use .content from Page object
+        setTotalPages(txRes.data.totalPages || 1);
       } catch (err) {
         console.error(err);
       } finally {
@@ -25,7 +30,7 @@ const UserTransactions = () => {
       }
     };
     fetchTx();
-  }, []);
+  }, [currentPage]);
 
   const filtered = transactions.filter(t => 
     (t.fromAccount || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -98,6 +103,11 @@ const UserTransactions = () => {
             </div>
           )}
         </div>
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={setCurrentPage} 
+        />
       </div>
     </motion.div>
   );

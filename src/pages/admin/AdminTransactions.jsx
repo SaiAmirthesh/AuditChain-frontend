@@ -2,17 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Loader } from 'lucide-react';
 import api from '../../services/api';
+import Pagination from '../../components/Pagination';
 
 const AdminTransactions = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchTxs = async () => {
       try {
-        const res = await api.get('/admin/transactions');
-        setTransactions(res.data);
+        setLoading(true);
+        const res = await api.get(`/admin/transactions?page=${currentPage}&size=10`);
+        setTransactions(res.data.content || []);
+        setTotalPages(res.data.totalPages || 1);
       } catch (err) {
         console.error(err);
       } finally {
@@ -20,7 +25,7 @@ const AdminTransactions = () => {
       }
     };
     fetchTxs();
-  }, []);
+  }, [currentPage]);
 
   const filtered = transactions.filter(t => 
     (t.fromAccount || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -99,6 +104,11 @@ const AdminTransactions = () => {
             </tbody>
           </table>
         </div>
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={setCurrentPage} 
+        />
       </div>
     </motion.div>
   );

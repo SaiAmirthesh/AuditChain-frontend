@@ -2,16 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Hash, AlertTriangle, ShieldCheck, Loader, Edit, Trash2 } from 'lucide-react';
 import api from '../../services/api';
+import Pagination from '../../components/Pagination';
 
 const AdminAuditLogs = () => {
   const [logs, setLogs] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchLogs = async () => {
     try {
-      const res = await api.get('/admin/logs');
-      setLogs(res.data);
+      setLoading(true);
+      const res = await api.get(`/admin/logs?page=${currentPage}&size=10`);
+      setLogs(res.data.content || []);
+      setTotalPages(res.data.totalPages || 1);
     } catch (err) {
       console.error(err);
     } finally {
@@ -21,7 +26,7 @@ const AdminAuditLogs = () => {
 
   useEffect(() => {
     fetchLogs();
-  }, []);
+  }, [currentPage]);
 
   const handleTamperUpdate = async (id, currentData) => {
     const newDataStr = prompt("Enter malicious new JSON payload to inject into this ledger record without fixing the hash:", currentData);
@@ -149,6 +154,11 @@ const AdminAuditLogs = () => {
             </tbody>
           </table>
         </div>
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={setCurrentPage} 
+        />
       </div>
     </motion.div>
   );
