@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { StatCard } from '../../components/StatCard';
-import { Users, DollarSign, AlertCircle, Loader, Cpu, BarChart3, Database } from 'lucide-react';
+import { Users, DollarSign, AlertCircle, Loader, Cpu, BarChart3, Database, ShieldCheck, Activity, MapPin } from 'lucide-react';
 import api from '../../services/api';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const AdminDashboard = () => {
   const [data, setData] = useState(null);
@@ -15,7 +16,7 @@ const AdminDashboard = () => {
   const [hasFetchedAi, setHasFetchedAi] = useState(false);
   const [isAiShrink, setIsAiShrink] = useState(true);
   const [maintenanceStatus, setMaintenanceStatus] = useState('');
-
+  const [analytics, setAnalytics] = useState(null);
   const fetchAI = async () => {
     try {
         setAiLoading(true);
@@ -32,21 +33,22 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        const [dashRes, accRes, txRes] = await Promise.all([
+        const [dashRes, accRes, txRes, analyticRes] = await Promise.all([
           api.get('/admin/dashboard'),
           api.get('/admin/accounts'),
-          api.get('/admin/transactions?page=0&size=10')
+          api.get('/admin/transactions?page=0&size=10'),
+          api.get('/admin/analytics')
         ]);
         setData(dashRes.data);
         setAccounts(accRes.data);
         setTransactions(txRes.data.content || []); // Use .content from Page object
+        setAnalytics(analyticRes.data);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchAdminData();
   }, []);
 
@@ -177,6 +179,70 @@ const AdminDashboard = () => {
               )}
           </div>
       </motion.div>
+
+      {/* Admin Intelligence Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
+          >
+              <h2 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider flex items-center gap-2">
+                <Activity className="text-blue-600" size={16} /> 
+                Transaction Value Distribution (Buckets)
+              </h2>
+              <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={analytics?.txValueBuckets || []}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                          <XAxis dataKey="range" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
+                          <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
+                          <ReTooltip 
+                            cursor={{fill: '#f8fafc'}}
+                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                          />
+                          <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} />
+                      </BarChart>
+                  </ResponsiveContainer>
+              </div>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
+          >
+              <h2 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider flex items-center gap-2">
+                <MapPin className="text-emerald-600" size={16} /> 
+                Transaction Geography Analysis
+              </h2>
+              <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                          <Pie
+                              data={analytics?.locationDistribution || []}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={60}
+                              outerRadius={80}
+                              paddingAngle={5}
+                              dataKey="count"
+                              nameKey="location"
+                          >
+                              {(analytics?.locationDistribution || []).map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={['#10b981', '#6366f1', '#f43f5e', '#f59e0b', '#8b5cf6'][index % 5]} />
+                              ))}
+                          </Pie>
+                          <ReTooltip 
+                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                          />
+                          <Legend iconType="circle" />
+                      </PieChart>
+                  </ResponsiveContainer>
+              </div>
+          </motion.div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         

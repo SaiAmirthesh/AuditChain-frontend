@@ -4,6 +4,7 @@ import { Wallet, ArrowDownRight, ArrowUpRight, Plus, Loader, Sparkles } from 'lu
 import { StatCard } from '../../components/StatCard';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 const UserDashboard = () => {
   const [account, setAccount] = useState(null);
@@ -13,6 +14,7 @@ const UserDashboard = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [hasFetchedAi, setHasFetchedAi] = useState(false);
   const [isAiShrink, setIsAiShrink] = useState(true);
+  const [analytics, setAnalytics] = useState(null);
 
   const fetchAI = async () => {
       try {
@@ -30,12 +32,14 @@ const UserDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [accRes, txRes] = await Promise.all([
+        const [accRes, txRes, analyticRes] = await Promise.all([
           api.get('/user/dashboard'),
-          api.get('/user/transactions')
+          api.get('/user/transactions'),
+          api.get('/user/analytics')
         ]);
         setAccount(accRes.data);
         setRecentTransactions(txRes.data.content || []); // Use .content
+        setAnalytics(analyticRes.data);
       } catch (err) {
         console.error("Error fetching dashboard data", err);
       } finally {
@@ -121,6 +125,68 @@ const UserDashboard = () => {
             )}
         </div>
       </motion.div>
+      
+      {/* Spending Analytics Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
+        >
+            <h2 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider flex items-center gap-2">
+                <div className="w-1.5 h-4 bg-indigo-600 rounded-full"></div>
+                Spending Distribution
+            </h2>
+            <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                        <Pie
+                            data={analytics?.categorySpending || []}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="amount"
+                            nameKey="category"
+                            label={(entry) => `₹${entry.amount.toFixed(2)}`}
+                        >
+                            {(analytics?.categorySpending || []).map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={['#6366f1', '#10b981', '#f43f5e', '#f59e0b', '#8b5cf6'][index % 5]} />
+                            ))}
+                        </Pie>
+                        <Tooltip 
+                            formatter={(value) => `₹${value.toFixed(2)}`}
+                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                        />
+                        <Legend iconType="circle" />
+                    </PieChart>
+                </ResponsiveContainer>
+            </div>
+        </motion.div>
+
+        <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-indigo-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden flex flex-col justify-center"
+        >
+            <div className="absolute top-0 right-0 p-8 opacity-10 -mr-10 -mt-10">
+                <Wallet size={160} />
+            </div>
+            <div className="relative z-10">
+                <h3 className="text-indigo-200 uppercase text-[10px] font-bold tracking-[0.2em] mb-2">Financial Summary</h3>
+                <p className="text-2xl font-bold mb-6 italic leading-relaxed">
+                   "Your spending is highest in <span className="text-rose-400">{(analytics?.categorySpending?.sort((a,b) => b.amount - a.amount)[0]?.category) || "General"}</span> this month."
+                </p>
+                <div className="flex gap-8">
+                    <div>
+                        <span className="block text-[10px] text-indigo-400 uppercase font-bold tracking-widest mb-1">Total Impact</span>
+                        <span className="text-xl font-bold">₹{account?.totalExpense?.toLocaleString()}</span>
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+      </div>
 
       {/* Recent Transactions Table */}
       <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
