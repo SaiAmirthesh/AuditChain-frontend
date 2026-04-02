@@ -149,11 +149,23 @@ const UserDashboard = () => {
                             paddingAngle={5}
                             dataKey="amount"
                             nameKey="category"
-                            label={(entry) => `₹${entry.amount.toFixed(2)}`}
                         >
-                            {(analytics?.categorySpending || []).map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={['#6366f1', '#10b981', '#f43f5e', '#f59e0b', '#8b5cf6'][index % 5]} />
-                            ))}
+                            {(analytics?.categorySpending || []).map((entry, index) => {
+                                const colors = {
+                                    'General': '#94a3b8',
+                                    'Shopping': '#f43f5e',
+                                    'Utilities': '#f59e0b',
+                                    'Salary': '#10b981',
+                                    'Entertainment': '#8b5cf6',
+                                    'Investment': '#6366f1'
+                                };
+                                return (
+                                    <Cell 
+                                        key={`cell-${index}`} 
+                                        fill={colors[entry.category] || ['#6366f1', '#10b981', '#f43f5e', '#f59e0b', '#8b5cf6'][index % 5]} 
+                                    />
+                                );
+                            })}
                         </Pie>
                         <Tooltip 
                             formatter={(value) => `₹${value.toFixed(2)}`}
